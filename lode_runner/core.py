@@ -1,5 +1,7 @@
 # coding: utf-8
 
+import os
+import sys
 import logging
 from unittest import suite
 
@@ -116,6 +118,21 @@ class LodeRunner(TextTestRunner):
 
 
 class LodeProgram(TestProgram):
+    def parseArgs(self, argv):
+        """Parse argv and env and configure running environment.
+        """
+        self.config.configure(argv, doc=self.usage())
+        log.debug("configured %s", self.config)
+
+        if self.config.options.version:
+            import pkg_resources
+            version = pkg_resources.get_distribution("lode_runner").version
+            sys.stdout = sys.__stdout__
+            print("%s version %s" % (os.path.basename(sys.argv[0]), version))
+            sys.exit(0)
+
+        return super(LodeProgram, self).parseArgs(argv)
+
     def runTests(self):
         from lode_runner.plugins import multiprocess
         multiprocess._instantiate_plugins = [
